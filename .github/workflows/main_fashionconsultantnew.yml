@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - FashionConsultantNew
+name: Build and deploy Python app to Azure Web App - fashionconsultantnew
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.10'
 
       - name: Create and start virtual environment
         run: |
@@ -68,14 +68,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D5C19CF4066340E1935663BD1FC48EBB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_453A23EDB8E341898DBE2F36E875EA4C }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_97AF6F90BB8A4F409535D9C86B836CF4 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_62153C5190474073B7BE530B25394654 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_526DD330323A46A0B3168663403A0C71 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_59802D0A604C41699998309C8ABD0C5B }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'FashionConsultantNew'
+          app-name: 'fashionconsultantnew'
           slot-name: 'Production'
           
