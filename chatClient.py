@@ -41,15 +41,37 @@ def reset_user_data():
 def analyze_user_action(user_input):
     context = f"""
     The user said: '{user_input}'. 
-    Please analyze if the user wants to:
-    1. Add new information to their user_data - if user doesn't indicate, it is add
-    2. Edit an existing entry in their user_data
-    3. Delete or remove an entry from their user_data
     
-    Output the intent: 
-    - Add: if the user wants to add new information
-    - Edit: if the user wants to edit an existing field
-    - Delete: if the user wants to delete or remove a field
+    Please analyze the user's input and determine the intended action with the following criteria:
+    
+    1. **Add**: If the user is providing new information that has not been mentioned before or is not clear if it exists in the data. 
+       - Example: "I want a red dress for my wedding" (Adding new data for wedding event with a new color preference).
+       - If the user simply describes their preference or a new item, treat it as an "add" action.
+       - Even if the word "add" is not mentioned, look for requests that imply adding new information such as "want," "plan," or "choose."
+
+    2. **Edit**: If the user wants to modify an existing entry. This would typically involve:
+       - Changing previously mentioned details.
+       - Example: "Actually, I want a black dress instead of red for my wedding."
+       - Look for indications where they are adjusting previously provided data, rather than adding a new piece.
+       - Look for words like "change," "modify," "adjust," "update," "replace."
+
+    3. **Delete**: If the user wants to remove a specific item or piece of information. This could be indicated explicitly or implied by phrases like:
+       - "Forget about the wedding dress" or "I no longer want to include a dress."
+       - If the user requests to remove a detail or stop considering something, treat it as a delete action.
+       - Look for negative phrases like "remove," "forget," "delete," or "stop considering."
+
+    Please ensure the following:
+    - If the input indicates a modification or change of an existing entry, classify it as "Edit".
+    - If it is a direct removal or negation of data, classify it as "Delete".
+    - If no prior context is mentioned (like a first-time request), classify it as "Add".
+    - If the user mentions something like "trip," "vacation," or "celebrate," treat it as an **event** (in this case, "travel").
+    - Words like "want," "choose," or "plan" generally suggest that the user wants to **add** something new.
+    - If the user requests specific details (e.g., "blue," "floral," "formal"), treat them as **attributes** of the main data, such as color or style.
+
+    Output the intent:
+    - "Add": for introducing new information or requests
+    - "Edit": for changes to existing information
+    - "Delete": for requests to remove something
     """
 
     response = client.chat.completions.create(
@@ -67,25 +89,44 @@ def analyze_user_action(user_input):
 def categorize_user_input(user_input):
     context = f"""
     The user said: '{user_input}'. 
-    Extract and categorize the following information only if it is explicitly mentioned in the user's input:
-        - event (e.g., 'wedding', 'birthday', 'interview', 'party',  etc.)
-        - style (e.g., 'casual', 'formal', etc.)
-        - garment_type (e.g., 'dress', 'shirt', 'jeans', etc.)
-        - sex_age (e.g., 'female, male, boy, girl, 25 years old, 20 years old, 15 years old, 35, female 15, male 26 years old, 15 boy')
-        - additional_details (e.g., 'color preference navy, no additional details, no, none, nope') - it could be none
 
-    Other fashion details not related to event, style, garment_type or sex_age will go to the additional details
-    Only present the categories that the user explicitly mentioned. 
-    Do not include any categories that were not mentioned by the user.
-    If not mentioned, never present the category that is not mentioned
+    Your task is to extract and categorize the following information based on context, even if the key terms are not explicitly mentioned:
+    
+    1. **Event/Occasion**: Any mention of a significant event or occasion like "wedding," "vacation," "birthday," "party," or "celebrate." 
+       - Look for context clues like "celebrate," "trip," "want to go," "have to prepare," or "plan a."
 
-    Output the intent: 
-    - event: only if it is mentioned
-    - style: only if it is mentioned
-    - garment_type: only if it is mentioned
-    - sex_age: only if it is mentioned
-    - additional_details: only if it is mentioned
+    2. **Style**: Identify any references to the style or look of an outfit (e.g., casual, formal, boho, chic, elegant, vintage, etc.).
+       - Words like "comfortable," "casual," "elegant," or "modern" can hint at style preferences.
 
+    3. **Garment Type**: Recognize clothing items like "dress," "shirt," "jeans," "blouse," etc., even if they're part of a broader description.
+       - Look for words like "wear," "outfit," "clothing," or "pick."
+
+    4. **Sex/Age**: Identify gender and age details when the user mentions them.
+       - Words like "boy," "girl," "15 years old," or "teenager" will help categorize this.
+
+    5. **Additional Details**: Extract any other relevant details like color preferences, fabric choices, or accessories.
+       - Look for details like "color," "material," "style," or "specific details."
+
+    **Important Notes**:
+    - Don't rely solely on exact matches—use the context to infer categories.
+    - If the user mentions "trip" or "celebrate," infer that they are referring to an **event** (like "travel" or "vacation").
+    - If the input includes any hints of specific preferences or choices, associate them with the appropriate category.
+
+    Output should be appeared only
+    - event: if an event is mentioned or inferred
+    - style: if a style preference is mentioned
+    - garment_type: if a clothing item is mentioned
+    - sex_age: if sex and age are mentioned
+    - additional_details: if specific attributes like color, fabric, etc., are mentioned
+
+    Output the response in the following format only if it is mentioned (without any extra labels):
+    Categorization:
+    - event: <event>
+    - style: <style>
+    - garment_type: <garment_type>
+    - sex_age: <sex_age>
+    - additional_details: <additional_details>
+    
     """
 
     response = client.chat.completions.create(
@@ -114,13 +155,34 @@ def fashion_suggestion(user_data):
     if user_data["additional_details"]:
         context += f"Additional Details: {', '.join(user_data['additional_details'])}\n"
 
+    prompt = f"""
+    You are a professional fashion consultant. Based on the user's preferences and the event, please generate a fashion suggestion that meets the following criteria:
+
+    - **Event**: Consider the occasion (e.g., wedding, party, interview). Is it formal or casual? Provide a suggestion that fits well for the event.
+    - **Style**: The user may have a specific style (e.g., casual, formal, boho). Choose clothing that matches this style. Ensure that the outfit feels cohesive and stylish.
+    - **Garment Type**: Suggest specific garments (e.g., dress, shirt, pants). Ensure the chosen garment complements the event and style.
+    - **Sex/Age**: Tailor the suggestion to the user’s age and gender.
+    - **Additional Details**: Consider any extra details, such as color preferences or specific design elements. Is the user looking for a bright, bold color or something more neutral? Take those preferences into account.
+    
+    Provide a clear, step-by-step suggestion, considering the following:
+    - Seasonality: If it's a summer or winter event, suggest appropriate fabrics (e.g., lightweight cotton or warm wool).
+    - Comfort: Ensure the suggested outfit is comfortable for the user, especially if it's for an event they’ll be at for a long time.
+    - Budget: If the user has mentioned a budget (e.g., affordable), suggest options that fall within reasonable price ranges.
+    - Accessories: Offer accessory ideas like shoes, jewelry, or bags that would complement the outfit.
+    - Fabrics: Mention specific fabrics that would be most appropriate for the suggested garment (e.g., silk for a formal wedding dress, denim for a casual outing).
+    - Occasion Appropriateness: Ensure the outfit is respectful and suitable for the event (e.g., no over-the-top outfits for a professional interview).
+
+    Here’s the user’s information:
+    {context}
+    Based on this, suggest an outfit that is appropriate for the occasion, stylish, and fits the user’s preferences.
+    """
 
     # Interact with GPT to generate a fashion suggestion
     response = client.chat.completions.create(
         model="gpt-35-turbo-16k",  # Or any model you are using
         messages=[
-            {"role": "system", "content": "You are a helpful fashion consultant. Based on the provided details, suggest a fashion style that matches to the event."},
-            {"role": "user", "content": context},
+            {"role": "system", "content": "You are a helpful fashion consultant. Provide detailed, customized fashion suggestions based on the user's input."},
+            {"role": "user", "content": prompt},
         ]
     )
 
