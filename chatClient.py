@@ -212,7 +212,8 @@ def generate_response():
     
     # Once all fields are filled, generate a fashion suggestion
     fashion_report = fashion_suggestion(user_data)
-    
+
+    print("Fashion Report:", fashion_report)
     # Now generate the fashion image based on the fashion suggestion
     generate_fashion_image(fashion_report)
     
