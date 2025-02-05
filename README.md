@@ -81,18 +81,19 @@ You can find the full list of dependencies in requirements.txt.
 
 
 ## Project Structure
+    .
+    ├── app.py                      # Main application entry point (Flask app)
+    ├── chatClient.py               # Handles user interaction and image generation
+    ├── imageClient.py              # Handles interaction with OpenAI DALL·E 3 API
+    ├── requirements.txt            # Python dependencies
+    ├── Procfile                    # Azure-specific deployment file
+    ├── .env                        # Configuration file with API keys and connection strings
+    ├── templates/                  # Folder for HTML templates
+    │   └── index.html              # Main HTML page for the app
+    ├── static/                     # Folder for static files (CSS, JS, images)
+    │   └── style.css               # CSS styles for the app
+    ├── images/                     # Folder to store generated images (if saved locally)
+    └── README.md                   # This file
 
-consultant
-├── app.py                     # Main application entry point (Flask app)
-├── chatClient.py               # Handles user interaction and image generation
-├── imageClient.py              # Handles interaction with OpenAI DALL·E 3 API
-├── requirements.txt            # Python dependencies
-├── Procfile                    # Azure-specific deployment file
-├── .env                        # Configuration file with API keys and connection strings
-├── templates/                  # Folder for HTML templates
-│   └── index.html              # Main HTML page for the app
-├── static/                     # Folder for static files (CSS, JS, images)
-│   └── style.css               # CSS styles for the app
-├── images/                     # Folder to store generated images (if saved locally)
-└── README.md                   # This file
+
              
