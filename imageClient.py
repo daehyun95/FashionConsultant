@@ -21,6 +21,7 @@ def generate_fashion_image(fashion_report):
         model="dall-e-3",  # The model you're using for image generation (DALL·E 3)
         prompt=fashion_report,  # Pass the fashion suggestion to the DALL·E model
         n=1  # Number of images to generate
+        size="1024x1024"
     )
 
     # Get the JSON response
